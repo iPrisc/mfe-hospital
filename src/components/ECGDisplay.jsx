@@ -56,8 +56,8 @@ const WAVE_COLOR = {
 };
 
 const POWER_BADGE_CONFIG = {
-  normal:  { label: '⚡ GRID POWER',    color: '#4a9eff' },
-  backup:  { label: '🔋 BACKUP POWER',  color: '#f59e0b' },
+  normal:  { label: 'GRID POWER',    color: '#4a9eff' },
+  backup:  { label: 'BACKUP POWER',  color: '#f59e0b' },
   offline: { label: 'OFFLINE',          color: '#4a5568' },
 };
 
