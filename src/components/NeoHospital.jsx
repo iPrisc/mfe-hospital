@@ -1,54 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import eventBus from 'shared/eventBus';
-import { INITIAL } from '../hospitalConfig';
+import { INITIAL, STATES, THRESHOLDS, COMMANDS, POWER_SEVERITY } from '../hospitalConfig';
 import './NeoHospital.css';
 import ECGDisplay from './ECGDisplay';
 import BedsGrid from './BedsGrid';
 import StatusBadge from './StatusBadge';
 import IntakesLog from './IntakesLog';
 
+function hospitalReducer(state, action) {
+  switch (action.type) {
+    case 'weather:change':
+      if (action.payload.toxicity > THRESHOLDS.toxicity) {
+        return { ...state, status: 'busy', ...STATES.busy, love: false };
+      }
+      return state;
+    case 'power:outage':
+      if (action.payload.severity === POWER_SEVERITY.total) {
+        return { ...state, status: 'critical', ...STATES.critical, generator: true, love: false };
+      } else if (action.payload.severity === POWER_SEVERITY.partial) {
+        return { ...state, status: 'busy', generator: true, love: false };
+      }
+      return state;
+    case 'crowd:panic':
+      if (action.payload.level > THRESHOLDS.panicLevel) {
+        return { ...state, status: 'overwhelmed', ...STATES.overwhelmed, love: false };
+      }
+      return state;
+    case 'hacker:command':
+      if (action.payload.command === COMMANDS.love) {
+        return { ...INITIAL, status: 'stable', ...STATES.love, love: true, generator: false };
+      } else if (action.payload.command === COMMANDS.reset) {
+        return { ...INITIAL };
+      }
+      return state;
+    default:
+      return state;
+  }
+}
+
 export default function NeoHospital() {
-  const [state, setState] = useState({ ...INITIAL });
+  const [state, dispatch] = useReducer(hospitalReducer, INITIAL);
 
   // ── Listeners ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const unsub = eventBus.on('weather:change', ({ condition, toxicity }) => {
-      if (toxicity > 40) {
-        setState((s) => ({ ...s, status: 'busy', occupied: 6, bpm: 95, love: false }));
-      }
-    });
-    return () => unsub();
-  }, []);
+    const unsubWeather = eventBus.on('weather:change', (payload) => dispatch({ type: 'weather:change', payload }));
+    const unsubPower = eventBus.on('power:outage', (payload) => dispatch({ type: 'power:outage', payload }));
+    const unsubCrowd = eventBus.on('crowd:panic', (payload) => dispatch({ type: 'crowd:panic', payload }));
+    const unsubHacker = eventBus.on('hacker:command', (payload) => dispatch({ type: 'hacker:command', payload }));
 
-  useEffect(() => {
-    const unsub = eventBus.on('power:outage', ({ severity, cityPower }) => {
-      if (severity === 'total') {
-        setState((s) => ({ ...s, status: 'critical', occupied: 9, bpm: 110, generator: true, love: false }));
-      } else if (severity === 'partial') {
-        setState((s) => ({ ...s, status: 'busy', generator: true, love: false }));
-      }
-    });
-    return () => unsub();
-  }, []);
-
-  useEffect(() => {
-    const unsub = eventBus.on('crowd:panic', ({ level }) => {
-      if (level > 80) {
-        setState((s) => ({ ...s, status: 'overwhelmed', occupied: 12, bpm: 140, love: false }));
-      }
-    });
-    return () => unsub();
-  }, []);
-
-  useEffect(() => {
-    const unsub = eventBus.on('hacker:command', ({ command }) => {
-      if (command === 'love') {
-        setState({ ...INITIAL, status: 'stable', occupied: 2, bpm: 65, love: true, generator: false });
-      } else if (command === 'reset') {
-        setState({ ...INITIAL });
-      }
-    });
-    return () => unsub();
+    return () => {
+      unsubWeather();
+      unsubPower();
+      unsubCrowd();
+      unsubHacker();
+    };
   }, []);
 
   // ── Emitter hospital:alert ────────────────────────────────────────────────
@@ -63,8 +68,10 @@ export default function NeoHospital() {
   // ── Simulate button ───────────────────────────────────────────────────────
   const simulate = () => eventBus.emit('crowd:panic', { level: 90 });
 
+  const rootClass = `neo-hospital${state.love ? ' love-mode' : ''}`;
+
   return (
-    <div className="neo-hospital">
+    <div className={rootClass}>
       <div className="hospital-header">
         <span>NEO HOSPITAL</span>
         <StatusBadge status={state.status} love={state.love} />

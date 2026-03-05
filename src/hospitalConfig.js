@@ -21,3 +21,18 @@ export const BADGE = {
   overwhelmed: { label: '\u{1F480} OVERWHELMED - NO BEDS LEFT', color: '#ef4444' },
   love:        { label: '\u{1F495} ALL HEALED',                  color: '#ff69b4' },
 };
+
+export const THRESHOLDS = {
+  toxicity: 40,
+  panicLevel: 80,
+};
+
+export const COMMANDS = {
+  love: 'love',
+  reset: 'reset',
+};
+
+export const POWER_SEVERITY = {
+  total: 'total',
+  partial: 'partial',
+};

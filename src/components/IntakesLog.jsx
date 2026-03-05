@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './NeoHospital.css';
 
 function now() {
   return new Date().toLocaleTimeString();
