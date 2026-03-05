@@ -200,3 +200,23 @@
   from { transform: translateX(-30%); }
   to { transform: translateX(620%); }
 }
+
+.bed-occupied {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.neo-hospital.love-mode {
+  --accent: #ff69b4;
+}
+
+.power-backup {
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.power-grid {
+  color: #00ff88;
+  border-color: #00ff88;
+}
