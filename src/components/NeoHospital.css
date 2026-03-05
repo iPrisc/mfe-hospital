@@ -134,7 +134,7 @@
 
 .beds-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 3px;
 }
 
@@ -148,7 +148,7 @@
 }
 
 .bed-empty    { border-color: #1a2332; color: #222; }
-.bed-occupied { background: rgba(0, 255, 136, 0.05); }
+.bed-occupied { border-color: #4a9eff; background: rgba(74, 158, 255, 0.15); }
 .bed-critical { background: rgba(255, 0, 60, 0.1); animation: pulse 0.5s infinite; }
 
 /* Admissions */
