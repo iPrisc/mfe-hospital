@@ -47,25 +47,53 @@ function generateECGPath(status, bpm) {
   return d;
 }
 
+const WAVE_COLOR = {
+  stable:      '#00ff88',
+  busy:        '#f59e0b',
+  critical:    '#ef4444',
+  overwhelmed: '#ef4444',
+  love:        '#ff69b4',
+};
+
+const POWER_BADGE_CONFIG = {
+  normal:  { label: '⚡ GRID POWER',    color: '#4a9eff' },
+  backup:  { label: '🔋 BACKUP POWER',  color: '#f59e0b' },
+  offline: { label: 'OFFLINE',          color: '#4a5568' },
+};
+
 export default function ECGDisplay({ bpm = 72, status = 'stable', generator = false }) {
   const ecgPath = useMemo(() => generateECGPath(status, bpm), [status, bpm]);
+
+  const strokeColor = WAVE_COLOR[status] ?? '#00ff88';
+  const powerKey = status === 'overwhelmed' ? 'offline' : generator ? 'backup' : 'normal';
+  const power = POWER_BADGE_CONFIG[powerKey];
 
   return (
     <div className="ecg-section">
       <div className="ecg-label">
-        <span>ECG</span>
-        <span className="bpm-display">{bpm} BPM</span>
+        <span style={{ color: strokeColor }}>ECG</span>
+        <span className="bpm-display" style={{ color: strokeColor }}>{bpm} BPM</span>
       </div>
 
       <div className="ecg-screen">
         <svg className="ecg-wave" viewBox="0 0 300 60" preserveAspectRatio="none">
-          <path className="ecg-path-glow" d={ecgPath} />
-          <path className="ecg-path" d={ecgPath} />
+          <path
+            className="ecg-path-glow"
+            d={ecgPath}
+            style={{ stroke: strokeColor }}
+          />
+          <path
+            className="ecg-path"
+            d={ecgPath}
+            style={{ stroke: strokeColor }}
+          />
         </svg>
         <div className="ecg-scanline" />
       </div>
 
-      <div className="power-badge">⚡ GRID POWER</div>
+      <div className="power-badge" style={{ color: power.color }}>
+        {power.label}
+      </div>
     </div>
   );
 }
